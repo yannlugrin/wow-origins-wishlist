@@ -1,5 +1,5 @@
 local function addOriginsWishlist(tooltip)
-	local itemName, itemLink = tooltip:GetItem()
+	local _, itemLink = tooltip:GetItem()
 
 	if itemLink then
 		local itemID = itemLink:match("item:(%d+):")
