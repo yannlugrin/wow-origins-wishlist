@@ -15,6 +15,6 @@ jobs:
         args: "--no-color -q"
         annotate: warning
     - name: Package Burning Crusade
-      uses: BigWigsMods/packager@main
+      uses: BigWigsMods/packager@master
       with:
         args: -d -g bcc
