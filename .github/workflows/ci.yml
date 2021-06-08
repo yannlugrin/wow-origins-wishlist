@@ -1,0 +1,20 @@
+name: CI
+on:
+  push:
+    branches:
+      - "*"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v1
+    - name: "Run Luacheck"
+      uses: nebularg/actions-luacheck@v1
+      with:
+        args: "--no-color -q"
+        annotate: warning
+    - name: Package Burning Crusade
+      uses: BigWigsMods/packager@main
+      with:
+        args: -d -g bcc

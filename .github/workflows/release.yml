@@ -1,0 +1,23 @@
+name: Release
+on:
+  push:
+    tags:
+      - "**"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v1
+    - name: "Run Luacheck"
+      uses: nebularg/actions-luacheck@v1
+      with:
+        args: "--no-color -q"
+        annotate: warning
+    - name: Package Burning Crusade
+      uses: BigWigsMods/packager@master
+      with:
+        args: -g bcc
+      env:
+        CF_API_KEY: ${{ secrets.CF_API_KEY }}
+        GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
