@@ -1,6 +1,12 @@
 -- Disable unused self warnings.
 self = false
 
+-- Disable line length limits.
+max_line_length = false
+max_code_line_length = false
+max_string_line_length = false
+max_comment_line_length = false
+
 -- Add exceptions for external libraries.
 std = "lua51"
 
