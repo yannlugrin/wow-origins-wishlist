@@ -27,6 +27,8 @@ read_globals = {
 	-- WoW API globals
 	"GameTooltip",
 	"ItemRefTooltip",
+	"CreateFrame",
+	"tContains",
 
 	-- Lua globals
 	"floor",

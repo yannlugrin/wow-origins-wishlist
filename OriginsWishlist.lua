@@ -3,7 +3,7 @@ local OriginsWishlistItems = {}
 
 -- Warmup
 EventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
-EventFrame:SetScript("OnEvent", function(self, event)
+EventFrame:SetScript("OnEvent", function(_, event)
 	if event ~= "PLAYER_ENTERING_WORLD" then return end
 
 	for playerName in pairs(OriginsWishlistExport) do
