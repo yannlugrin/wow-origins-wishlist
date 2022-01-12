@@ -1,8 +1,8 @@
 name: Update
 on:
   workflow_dispatch:
-  # schedule:
-  #   - cron: '30 5 * * *'
+  schedule:
+    - cron: '30 4 * * *'
 jobs:
   update:
     runs-on: ubuntu-latest
@@ -43,4 +43,4 @@ jobs:
         git diff
         git commit -am "Update export"
         git tag -am "Release ${{ steps.git-check.outputs.new-version }}" ${{ steps.git-check.outputs.new-version }}
-        git push --follow-tags --dry-run
+        git push --follow-tags
