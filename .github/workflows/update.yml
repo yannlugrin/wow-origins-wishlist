@@ -10,7 +10,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
       with:
-        token: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+        token: ${{ secrets.GH_PERONAL_ACCESS_TOKEN }}
     - name: Fetch export from google spreadsheet
       run: |
         curl -s "https://sheets.googleapis.com/v4/spreadsheets/${{ secrets.SPREADSHEET_ID }}/values/${{ secrets.SPREADSHEET_RANGE }}?key=${{ secrets.SPREADSHEET_API_KEY }}" | jq -r ".values[][]" > OriginsWishlistExport.lua
