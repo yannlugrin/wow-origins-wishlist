@@ -1,0 +1,46 @@
+name: Update
+on:
+  workflow_dispatch:
+  # schedule:
+  #   - cron: '30 5 * * *'
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    - name: Fetch export from google spreadsheet
+      run: |
+        curl -s "https://sheets.googleapis.com/v4/spreadsheets/${{ secrets.SPREADSHEET_ID }}/values/${{ secrets.SPREADSHEET_RANGE }}?key=${{ secrets.SPREADSHEET_API_KEY }}" | jq -r ".values[][]" > OriginsWishlistExport.lua
+    - name: Check if export was updated
+      id: git-check
+      run: |
+        currentVersion=$(grep "## Version:" OriginsWishlist.toc | sed 's/## Version: \([0-9]\{1,\}\)/\1/')
+        echo ::set-output name=current-version::${currentVersion}
+        echo ::set-output name=new-version::$(echo "${currentVersion%.*}.$((${currentVersion##*.}+1))")
+        echo ::set-output name=modified::$(if [ -n "$(git status --porcelain)" ]; then echo "true"; else echo "false"; fi)
+    - name: Update version
+      if: steps.git-check.outputs.modified == 'true'
+      run: |
+        cat OriginsWishlist.toc | sed 's/## Version: ${{ steps.git-check.outputs.current-version }}/## Version: ${{ steps.git-check.outputs.new-version }}/' > OriginsWishlist.toc.new
+        mv OriginsWishlist.toc.new OriginsWishlist.toc
+    - name: "Run Luacheck"
+      uses: nebularg/actions-luacheck@v1
+      if: steps.git-check.outputs.modified == 'true'
+      with:
+        args: "--no-color -q"
+        annotate: warning
+    - name: Package Burning Crusade
+      uses: BigWigsMods/packager@master
+      if: steps.git-check.outputs.modified == 'true'
+      with:
+        args: -d -g bcc
+    - name: Push new release
+      if: steps.git-check.outputs.modified == 'true'
+      run: |
+        git config --global user.name 'Yann Lugrin'
+        git config --global user.email 'yannlugrin@users.noreply.github.com'
+        git diff
+        git commit -am "Update export"
+        git tag -am "Release ${{ steps.git-check.outputs.new-version }}" ${{ steps.git-check.outputs.new-version }}
+        git push --follow-tags --dry-run
