@@ -1,10 +1,11 @@
 local EventFrame = CreateFrame("frame", "EventFrame")
 local OriginsWishlistItems = {}
+local next = next
 
 -- Warmup
 EventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 EventFrame:SetScript("OnEvent", function(_, event)
-	if event ~= "PLAYER_ENTERING_WORLD" then return end
+	if event ~= "PLAYER_ENTERING_WORLD" or next(OriginsWishlistItems) ~= nil then return end
 
 	for playerName in pairs(OriginsWishlistExport) do
 		local playerClassColor = OriginsWishlistExport[playerName].classColor

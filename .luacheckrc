@@ -35,6 +35,7 @@ read_globals = {
 	"geterrorhandler",
 	"error",
 	"ipairs",
+	"next",
 	"pairs",
 	"print",
 	"select",
