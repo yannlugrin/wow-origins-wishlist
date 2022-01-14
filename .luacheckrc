@@ -24,11 +24,17 @@ ignore = {
 }
 
 read_globals = {
+	"_G",
+
 	-- WoW API globals
 	"GameTooltip",
 	"ItemRefTooltip",
 	"CreateFrame",
 	"tContains",
+	"tinsert",
+
+	-- Libraries globals,
+	"LibStub",
 
 	-- Lua globals
 	"floor",
