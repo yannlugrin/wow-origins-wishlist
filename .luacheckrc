@@ -31,6 +31,7 @@ read_globals = {
 	"CreateFrame",
 	"tContains",
 	"tinsert",
+	"tremove",
 
 	-- Libraries globals,
 	"LibStub",
