@@ -1,7 +1,7 @@
 ## Interface-BCC: 20501
 ## Title: Orïgins Wishlist
 ## Author: MrCaillou
-## Version: 0.2.6
+## Version: 0.2.7
 ## Notes: This is an addon for the Orïgins Guild on Auberdine to show chars that have add an item on there wishlist.
 ## X-Website: https://github.com/yannlugrin/wow-origins-wishlist
 ## X-Curse-Project-ID: 492258
