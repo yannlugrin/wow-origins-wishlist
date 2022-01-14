@@ -26,27 +26,35 @@ ignore = {
 
 read_globals = {
 	-- WoW API globals
-	"GameTooltip",
-	"ItemRefTooltip",
 	"CreateFrame",
+	"GameTooltip",
+	"GetAddOnMetadata",
+	"ItemRefTooltip",
+	
+	-- WoW lua globals
 	"tContains",
 	"tinsert",
 	"tremove",
 
-	-- Libraries globals,
+	-- Libraries and addons globals,
 	"LibStub",
+	"RCLootCouncil",
 
 	-- Lua globals
+	"date",
+	"error",
 	"floor",
 	"geterrorhandler",
-	"error",
 	"ipairs",
 	"next",
 	"pairs",
 	"print",
 	"select",
 	"setmetatable",
+	"strfind",
 	"string",
+	"strlower",
+	"strsplit",
 	"table",
 	"tonumber",
 	"tostring",
