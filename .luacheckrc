@@ -12,6 +12,7 @@ std = "lua51"
 
 globals = {
 	-- Origins Wishlist
+	"OriginsWishlist",
 	"OriginsWishlistExport"
 }
 
@@ -24,8 +25,6 @@ ignore = {
 }
 
 read_globals = {
-	"_G",
-
 	-- WoW API globals
 	"GameTooltip",
 	"ItemRefTooltip",

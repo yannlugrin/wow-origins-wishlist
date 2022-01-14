@@ -33,7 +33,7 @@ function OriginsWishlist:OnInitialize()
 			if tContains(data.awarded.items, itemID) then
 				itemStatus = "awarded"
 			end
-			
+
 			tinsert(db.items[itemID][itemStatus], playerName)
 			tinsert(db.items[itemID]["whishlist"], playerName)
 		end
@@ -72,7 +72,7 @@ local function addItemTooltip(tooltip)
 
 				awarded = awarded .. "|cff" ..  db.players[playerName].classColor .. playerName .. "|r"
 			end
-			
+
 			if (needed ~= "" or awarded ~= "") then
 				tooltip:AddLine("\n")
 				tooltip:AddLine("Orïgins Wishlist (" .. #db.items[itemID].awarded .. "/" .. #db.items[itemID].whishlist .. ")", nil, nil, nil, false)
