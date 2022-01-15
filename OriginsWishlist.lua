@@ -1,6 +1,9 @@
 local addonname, addontable = ...
 _G.OriginsWishlist = LibStub("AceAddon-3.0"):NewAddon(addontable, addonname, "AceConsole-3.0", "AceEvent-3.0", "AceComm-3.0", "AceSerializer-3.0", "AceHook-3.0");
 
+local RCLootCouncil = LibStub("AceAddon-3.0"):GetAddon("RCLootCouncil_Classic")
+local LD = LibStub("LibDeflate")
+
 -- db shortcut
 local db
 
@@ -52,8 +55,11 @@ function OriginsWishlist:OnInitialize()
 end
 
 function OriginsWishlist:OnEnable()
-	self:RegisterMessage("RCMLAwardSuccess", "OnRCLCEMessageReceived")
-	self:RegisterMessage("RCMLAwardFailed", "OnRCLCEMessageReceived")
+	self:RegisterComm("RCLootCouncil")
+
+	self:RegisterMessage("RCMLLootHistorySend", "OnMessageReceived")
+	self:RegisterMessage("RCMLAwardSuccess", "OnMessageReceived")
+	self:RegisterMessage("RCMLAwardFailed", "OnMessageReceived")
 
 	self:RegisterChatCommand("whishlist", "ChatCommand")
 
@@ -62,8 +68,33 @@ function OriginsWishlist:OnEnable()
 	self:HookScript(GameTooltip, "OnTooltipSetUnit", "addPlayerTooltip")
 end
 
-function OriginsWishlist:OnRCLCEMessageReceived(msg, session, winner, status)
-	self:Debug("OnRCLCEMessageReceived", msg, session, winner, status)
+function OriginsWishlist:OnDisable()
+	self:UnregisterChatCommand("whishlist")
+	self:UnregisterAllComm()
+	self:UnregisterAllEvents()
+end
+
+local function decompressor(data)
+	local decoded = LD:DecodeForWoWAddonChannel(data)
+	if not decoded then return data end -- Assume it's a pre 0.10 message.
+	local serializedMsg = LD:DecompressDeflate(decoded)
+	return serializedMsg or ""
+end
+
+function OriginsWishlist:OnCommReceived(prefix, compressedMessage, distri, sender)
+	if prefix ~= "RCLootCouncil" then return end
+
+	local test, command, data = RCLootCouncil:Deserialize(decompressor(compressedMessage))
+	if RCLootCouncil:HandleXRealmComms(self, command, data, sender) then return end
+
+	self:Debug("Comm received:", command, "from:", sender, "distri:", distri, "test:", test)
+	for key, value in pairs(data) do
+		self:Debug(key, value)
+	end
+end
+
+function OriginsWishlist:OnMessageReceived(msg, session, winner, status)
+	self:Debug("OnMessageReceived", msg, session, winner, status)
 	if msg ~= "RCMLAwardSuccess" then return end
 
 	local lootTable = RCLootCouncil:GetLootTable()

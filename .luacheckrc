@@ -18,7 +18,9 @@ globals = {
 
 exclude_files = {
 	".luacheckrc",
+	"Libs",
 }
+
 
 ignore = {
 	"542", -- empty if branch
@@ -36,9 +38,8 @@ read_globals = {
 	"tinsert",
 	"tremove",
 
-	-- Libraries and addons globals,
+	-- Libraries globals,
 	"LibStub",
-	"RCLootCouncil",
 
 	-- Lua globals
 	"date",
