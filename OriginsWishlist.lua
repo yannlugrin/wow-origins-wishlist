@@ -8,7 +8,7 @@ local LD = LibStub("LibDeflate")
 local db
 
 -- lua
-local ipairs, pairs, select, tContains, tinsert, tremove = ipairs, pairs, select, tContains, tinsert, tremove
+local ipairs, pairs, select, tContains, time, tinsert, tremove = ipairs, pairs, select, tContains, time, tinsert, tremove
 
 -- Initilize method
 --
@@ -16,15 +16,14 @@ local ipairs, pairs, select, tContains, tinsert, tremove = ipairs, pairs, select
 function OriginsWishlist:OnInitialize()
 	self.name = addonname
 	self.version = GetAddOnMetadata("OriginsWishlist", "Version")
-	self.debug = true
+	self.debug = false
 
 	self.db = LibStub("AceDB-3.0"):New("OriginsWishlistDB", {factionrealm = {updatedAt = nil, items = {}, players = {}}})
 	db = self.db.factionrealm
 
-	if db.updatedAt ~= nil and OriginsWishlistExport.updatedAt <= db.updatedAt then return end
-
 	self:Debug("OnInitialize:LoadExport", OriginsWishlistExport.updatedAt, db.updatedAt)
 
+	-- Prepare whishlist per item.
 	db.items = {}
 	for playerName, playerData in pairs(OriginsWishlistExport.players) do
 		db.players[playerName] = playerData
@@ -51,7 +50,6 @@ function OriginsWishlist:OnInitialize()
 		end
 	end
 
-	db.updatedAt = OriginsWishlistExport.updatedAt
 end
 
 function OriginsWishlist:OnEnable()
@@ -108,12 +106,12 @@ function OriginsWishlist:OnMessageReceived(msg, session, winner, status)
 	if not tContains(db.players[playerName].whishlist.items, itemID) then return end
 	if tContains(db.players[playerName].awarded.items, itemID) then return end
 
-	-- Add item to player awared list
+	-- Add item to player awared list.
 	tinsert(db.players[playerName].awarded.items, itemID)
 	db.players[playerName].awarded.count = db.players[playerName].awarded.count + 1
-	db.players[playerName].awarded.lastAt = date("%d %b.")
+	db.players[playerName].awarded.lastAt = time()
 
-	-- Add player to item awared list
+	-- Add player to item awared list.
 	if db.items[itemID] == nil then
 		db.items[itemID] = {
 			whishlist = {},
@@ -126,6 +124,9 @@ function OriginsWishlist:OnMessageReceived(msg, session, winner, status)
 	for index, value in ipairs(db.items[itemID].needed) do
 		if value == playerName then tremove(db.items[itemID].needed, index) end
 	end
+	
+	-- Set database update time.
+	db.updatedAt = db.players[playerName].awarded.lastAt
 end
 
 -- Item Tooltip hook
@@ -144,8 +145,8 @@ function OriginsWishlist:addItemTooltip(tooltip)
 		end
 
 		needed = needed .. "|cff" ..  db.players[playerName].classColor .. playerName .. "|r (".. db.players[playerName].awarded.count .. "/" .. db.players[playerName].whishlist.count
-		if db.players[playerName].awarded.lastAt ~= nil and db.players[playerName].awarded.lastAt ~= "" then
-			needed = needed .. ", " .. db.players[playerName].awarded.lastAt
+		if db.players[playerName].awarded.lastAt ~= nil then
+			needed = needed .. ", " .. date("%d %b.", db.players[playerName].awarded.lastAt)
 		end
 		needed = needed .. ")"
 	end
@@ -200,14 +201,19 @@ function OriginsWishlist:ChatCommand(msg)
 	    end
 	until arg == nil
 	input = strlower(input or "")
+
 	self:Debug("/", input, unpack(args))
 
 	if input == 'debug' or input == 'd' then
 		self.debug = not self.debug
-		self:Print("Debug = " .. tostring(self.debug))
+		self:Print("Debug:", tostring(self.debug))
+		return
+	end
 
-	elseif input == 'version' or input == "v" then
+	if input == 'version' or input == "v" then
 		self:Print(self.name, self.version)
+		self:Print("Database update", db.updatedAt)
+		return
 	end
 end
 

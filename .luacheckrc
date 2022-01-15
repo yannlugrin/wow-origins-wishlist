@@ -57,6 +57,7 @@ read_globals = {
 	"strlower",
 	"strsplit",
 	"table",
+	"time",
 	"tonumber",
 	"tostring",
 	"type"
