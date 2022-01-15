@@ -1,5 +1,6 @@
 OriginsWishlistExport = {}
 OriginsWishlistExport["updatedAt"] = @file-timestamp@
+OriginsWishlistExport["lastAwardedAt"] = 1642032000
 OriginsWishlistExport["players"] = {}
 
 OriginsWishlistExport["players"]["Alverius"] = {name = "Alverius", classColor = "f48cba", whishlist = {items = {28830, 29947, 29997, 30022, 30055, 30057, 30081, 30098, 30106, 30129, 30132, 30236, 30242, 30245}, count = 12, },awarded = {items = {0, 29947, 30242}, count = 2, lastAt = 1641772800}}

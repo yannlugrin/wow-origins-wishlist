@@ -21,7 +21,17 @@ function OriginsWishlist:OnInitialize()
 	self.db = LibStub("AceDB-3.0"):New("OriginsWishlistDB", {factionrealm = {updatedAt = nil, items = {}, players = {}}})
 	db = self.db.factionrealm
 
-	self:Debug("OnInitialize:LoadExport", OriginsWishlistExport.updatedAt, db.updatedAt)
+	
+	-- if local database was updated more recently than the export, skip importation.
+	if db.updatedAt ~= nil and OriginsWishlistExport.updatedAt <= db.updatedAt then return end
+
+	-- if local awared items was updated more recently than last awarded item in export, keep local awarded items list.
+	self:Debug("OnInitialize:LoadExport", db.updatedAt, OriginsWishlistExport.updatedAt, OriginsWishlistExport.lastAwardedAt)
+	if db.lastAwardedAt ~= nil and OriginsWishlistExport.lastAwardedAt <= db.lastAwardedAt then
+		for _, playerData in pairs(OriginsWishlistExport.players) do
+			playerData.awarded = db.players[playerName].awarded
+		end
+	end
 
 	-- Prepare whishlist per item.
 	db.items = {}
@@ -50,6 +60,9 @@ function OriginsWishlist:OnInitialize()
 		end
 	end
 
+	-- Set local database updated dates.
+	db.updatedAt = OriginsWishlistExport.updatedAt
+	db.lastAwardedAt = OriginsWishlistExport.lastAwardedAt
 end
 
 function OriginsWishlist:OnEnable()
@@ -125,8 +138,9 @@ function OriginsWishlist:OnMessageReceived(msg, session, winner, status)
 		if value == playerName then tremove(db.items[itemID].needed, index) end
 	end
 	
-	-- Set database update time.
+	-- Set database update times.
 	db.updatedAt = db.players[playerName].awarded.lastAt
+	db.lastAwardedAt = db.players[playerName].awarded.lastAt
 end
 
 -- Item Tooltip hook
@@ -212,7 +226,7 @@ function OriginsWishlist:ChatCommand(msg)
 
 	if input == 'version' or input == "v" then
 		self:Print(self.name, self.version)
-		self:Print("Database update", db.updatedAt)
+		self:Print("Database update:", db.updatedAt)
 		return
 	end
 end
