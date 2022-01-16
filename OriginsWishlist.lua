@@ -21,14 +21,13 @@ function OriginsWishlist:OnInitialize()
 	self.db = LibStub("AceDB-3.0"):New("OriginsWishlistDB", {factionrealm = {updatedAt = nil, items = {}, players = {}}})
 	db = self.db.factionrealm
 
-	
 	-- if local database was updated more recently than the export, skip importation.
 	if db.updatedAt ~= nil and OriginsWishlistExport.updatedAt <= db.updatedAt then return end
 
 	-- if local awared items was updated more recently than last awarded item in export, keep local awarded items list.
 	self:Debug("OnInitialize:LoadExport", db.updatedAt, OriginsWishlistExport.updatedAt, OriginsWishlistExport.lastAwardedAt)
 	if db.lastAwardedAt ~= nil and OriginsWishlistExport.lastAwardedAt <= db.lastAwardedAt then
-		for _, playerData in pairs(OriginsWishlistExport.players) do
+		for playerName, playerData in pairs(OriginsWishlistExport.players) do
 			playerData.awarded = db.players[playerName].awarded
 		end
 	end
@@ -137,7 +136,7 @@ function OriginsWishlist:OnMessageReceived(msg, session, winner, status)
 	for index, value in ipairs(db.items[itemID].needed) do
 		if value == playerName then tremove(db.items[itemID].needed, index) end
 	end
-	
+
 	-- Set database update times.
 	db.updatedAt = db.players[playerName].awarded.lastAt
 	db.lastAwardedAt = db.players[playerName].awarded.lastAt

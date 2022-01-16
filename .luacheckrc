@@ -19,8 +19,8 @@ globals = {
 exclude_files = {
 	".luacheckrc",
 	"Libs",
+	"OriginsWishlistExport.lua"
 }
-
 
 ignore = {
 	"542", -- empty if branch
