@@ -101,19 +101,30 @@ function OriginsWishlist:OnCommReceived(prefix, compressedMessage, distri, sende
 	for key, value in pairs(data) do
 		self:Debug(key, value)
 	end
+
+	if command == "awarded" then
+		self:AwardItem(data[1], distri)
+		return
+	end
 end
 
 function OriginsWishlist:OnMessageReceived(msg, session, winner, status)
 	self:Debug("OnMessageReceived", msg, session, winner, status)
-	if msg ~= "RCMLAwardSuccess" then return end
 
+	if msg == "RCMLAwardSuccess" then
+		self:AwardItem(session, winner)
+		return
+	end
+end
+
+function OriginsWishlist:AwardItem(session, winner)
 	local lootTable = RCLootCouncil:GetLootTable()
 
 	if lootTable[session] == nil or lootTable[session].link == nil or winner == nil then return end
 	local itemID = tonumber(select(3, strfind(lootTable[session].link, "item:(%d+)")))
 	local playerName = select(1, strsplit("-", winner, 2))
 
-	self:Debug("OnRCLCEMessageReceived:AddItem", playerName, itemID, lootTable[session].link)
+	self:Debug("OriginsWishlist:AwardItem", playerName, itemID, lootTable[session].link)
 	if db.players[playerName] == nil then return end
 	if not tContains(db.players[playerName].whishlist.items, itemID) then return end
 	if tContains(db.players[playerName].awarded.items, itemID) then return end
@@ -195,8 +206,8 @@ function OriginsWishlist:addPlayerTooltip(tooltip)
 	if db.players[playerName] ~= nil then
 		tooltip:AddLine("\nOrïgins Wishlist (".. db.players[playerName].awarded.count .. "/" .. db.players[playerName].whishlist.count .. ")", nil, nil, nil, false)
 
-		if db.players[playerName].awarded.lastAt ~= "" then
-			tooltip:AddLine("Dernier loot le " .. db.players[playerName].awarded.lastAt, nil, nil, nil, false)
+		if db.players[playerName].awarded.lastAt ~= nil then
+			tooltip:AddLine("Dernier loot le " .. date("%d %b.", db.players[playerName].awarded.lastAt), nil, nil, nil, false)
 		end
 	end
 end
