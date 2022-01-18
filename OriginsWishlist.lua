@@ -21,40 +21,73 @@ function OriginsWishlist:OnInitialize()
 	self.db = LibStub("AceDB-3.0"):New("OriginsWishlistDB", {factionrealm = {updatedAt = nil, items = {}, players = {}}})
 	db = self.db.factionrealm
 
-	-- if local database was updated more recently than the export, skip importation.
-	if db.updatedAt ~= nil and OriginsWishlistExport.updatedAt <= db.updatedAt then return end
+	-- if expport database was updated recently load it.
+	if db.updatedAt == nil or OriginsWishlistExport.updatedAt >= db.updatedAt then
+		OriginsWishlist:loadExport()
+	end
 
-	-- if local awared items was updated more recently than last awarded item in export, keep local awarded items list.
+	db.version = self.version
+end
+
+function OriginsWishlist:loadExport(resetAwarded)
+	resetAwarded = resetAwarded or false
+
 	self:Debug("OnInitialize:LoadExport", db.updatedAt, OriginsWishlistExport.updatedAt, OriginsWishlistExport.lastAwardedAt)
-	if db.lastAwardedAt ~= nil and OriginsWishlistExport.lastAwardedAt <= db.lastAwardedAt then
-		for playerName, playerData in pairs(OriginsWishlistExport.players) do
-			playerData.awarded = db.players[playerName].awarded
-		end
+
+	-- Ensure to set awarded items for data comming from version previous to 0.4.0
+	if db.players[playerName]["awarded"].items == nil then
+		resetAwarded = true
 	end
 
 	-- Prepare whishlist per item.
 	db.items = {}
 	for playerName, playerData in pairs(OriginsWishlistExport.players) do
-		db.players[playerName] = playerData
+		if db.players[playerName] ~= nil then
+			db.players[playerName] =  {
+				name = playerData.name,
+				classColor = playerData.classColor
+			}
+		end
 
+		db.players[playerName]["whishlist"] = { items = {}, count = 0 }
+		db.players[playerName]["needed"] = { items = {}, count = 0 }
+
+		-- if local awared items was updated more recently than last awarded item in export, keep local awarded items list.
+		if resetAwarded or db.lastAwardedAt == nil or OriginsWishlistExport.lastAwardedAt >= db.lastAwardedAt then
+			db.players[playerName]["awarded"] = { items = {}, count = 0, lastAt = playerData.awarded.lastAt }
+		end
+
+		-- Populate items lists.
 		for _, itemID in ipairs(playerData.whishlist.items) do
 			if itemID > 0 then
 				self:Debug("OnInitialize:AddItem", playerName, itemID)
+
 				if db.items[itemID] == nil then
 					db.items[itemID] = {
-						whishlist = {},
-						needed = {},
-						awarded = {}
+						whishlist = { players = {}, count = 0 },
+						needed = { players = {}, count = 0 },
+						awarded = { players = {}, count = 0 }
 					}
 				end
 
 				local itemStatus = "needed"
-				if tContains(playerData.awarded.items, itemID) then
+				if tContains(db.players[playerName].awarded.items, itemID) or tContains(playerData.awarded.items, itemID) then
 					itemStatus = "awarded"
 				end
+				
+				tinsert(db.items[itemID]["whishlist"].players, playerName)
+				db.items[itemID]["whishlist"].count = db.items[itemID]["whishlist"].count + 1
 
-				tinsert(db.items[itemID][itemStatus], playerName)
-				tinsert(db.items[itemID]["whishlist"], playerName)
+				tinsert(db.items[itemID][itemStatus].players, playerName)
+				db.items[itemID][itemStatus].count = db.items[itemID][itemStatus].count + 1
+				
+				tinsert(db.players[playerName]["whishlist"].items, itemID)
+				db.players[playerName]["whishlist"].count = db.players[playerName]["whishlist"].count + 1
+				
+				if not tContains(db.players[playerName][itemStatus].items, itemID) then
+					tinsert(db.players[playerName][itemStatus].items, itemID)
+					db.players[playerName][itemStatus].count = db.players[playerName][itemStatus].count + 1
+				end
 			end
 		end
 	end
@@ -134,19 +167,27 @@ function OriginsWishlist:AwardItem(session, winner)
 	db.players[playerName].awarded.count = db.players[playerName].awarded.count + 1
 	db.players[playerName].awarded.lastAt = time()
 
+	for index, value in ipairs(db.players[playerName].needed.items) do
+		if value == itemID then tremove(db.players[playerName].needed.items, index) end
+	end
+	db.players[playerName].needed.count = db.players[playerName].needed.count - 1
+
 	-- Add player to item awared list.
 	if db.items[itemID] == nil then
 		db.items[itemID] = {
-			whishlist = {},
-			needed = {},
-			awarded = {}
+			whishlist = { players = {}, count = 0 },
+			needed = { players = {}, count = 0 },
+			awarded = { players = {}, count = 0 }
 		}
 	end
 
-	tinsert(db.items[itemID].awarded, playerName)
-	for index, value in ipairs(db.items[itemID].needed) do
-		if value == playerName then tremove(db.items[itemID].needed, index) end
+	tinsert(db.items[itemID].awarded.players, playerName)
+	db.items[itemID].awarded.count = db.items[itemID].awarded.count + 1
+
+	for index, value in ipairs(db.items[itemID].needed.players) do
+		if value == playerName then tremove(db.items[itemID].needed.players, index) end
 	end
+	db.items[itemID].needed.count = b.items[itemID].needed.count - 1
 
 	-- Set database update times.
 	db.updatedAt = db.players[playerName].awarded.lastAt
@@ -163,7 +204,7 @@ function OriginsWishlist:addItemTooltip(tooltip)
 
 	-- Prepare needed line
 	local needed = ""
-	for _, playerName in ipairs(db.items[itemID].needed) do
+	for _, playerName in ipairs(db.items[itemID].needed.players) do
 		if needed ~= "" then
 			needed = needed .. ", "
 		end
@@ -177,7 +218,7 @@ function OriginsWishlist:addItemTooltip(tooltip)
 
 	-- Prepare awarded line
 	local awarded = ""
-	for _, playerName in ipairs(db.items[itemID].awarded) do
+	for _, playerName in ipairs(db.items[itemID].awarded.players) do
 		if awarded ~= "" then
 			awarded = awarded .. ", "
 		end
@@ -188,7 +229,7 @@ function OriginsWishlist:addItemTooltip(tooltip)
 	-- Display info on tooltip
 	if (needed ~= "" or awarded ~= "") then
 		tooltip:AddLine("\n")
-		tooltip:AddLine("Orïgins Wishlist (" .. #db.items[itemID].awarded .. "/" .. #db.items[itemID].whishlist .. ")", nil, nil, nil, false)
+		tooltip:AddLine("Orïgins Wishlist (" .. db.items[itemID].awarded.count .. "/" .. db.items[itemID].whishlist.count .. ")", nil, nil, nil, false)
 	end
 	if (needed ~= "") then
 		tooltip:AddLine("Besoin : " .. needed, nil, nil, nil, true)
@@ -227,6 +268,11 @@ function OriginsWishlist:ChatCommand(msg)
 	input = strlower(input or "")
 
 	self:Debug("/", input, unpack(args))
+
+	if input == 'reset' then
+		OriginsWishlist:loadExport(true)
+		return
+	end
 
 	if input == 'debug' or input == 'd' then
 		self.debug = not self.debug
