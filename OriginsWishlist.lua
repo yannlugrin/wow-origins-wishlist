@@ -34,11 +34,6 @@ function OriginsWishlist:loadExport(resetAwarded)
 
 	self:Debug("OnInitialize:LoadExport", db.updatedAt, OriginsWishlistExport.updatedAt, OriginsWishlistExport.lastAwardedAt)
 
-	-- Ensure to set awarded items for data comming from version previous to 0.4.0
-	if db.players[playerName]["awarded"].items == nil then
-		resetAwarded = true
-	end
-
 	-- Prepare whishlist per item.
 	db.currentPhase = OriginsWishlistExport.currentPhase
 	db.nextPhase = OriginsWishlistExport.nextPhase
@@ -49,6 +44,11 @@ function OriginsWishlist:loadExport(resetAwarded)
 				name = playerData.name,
 				classColor = playerData.classColor
 			}
+		end
+
+		-- Ensure to set awarded items for data comming from version previous to 0.3.2
+		if not resetAwarded and db.players[playerName]["awarded"].items == nil then
+			resetAwarded = true
 		end
 
 		db.players[playerName]["whishlist"] = { items = {}, nextPhase = {}, count = 0 }
@@ -76,13 +76,13 @@ function OriginsWishlist:loadExport(resetAwarded)
 				if tContains(db.players[playerName].awarded.items, itemID) or tContains(playerData.awarded.items, itemID) then
 					itemStatus = "awarded"
 				end
-				
+
 				tinsert(db.items[itemID]["whishlist"].players, playerName)
 				db.items[itemID]["whishlist"].count = db.items[itemID]["whishlist"].count + 1
 
 				tinsert(db.items[itemID][itemStatus].players, playerName)
 				db.items[itemID][itemStatus].count = db.items[itemID][itemStatus].count + 1
-				
+
 				tinsert(db.players[playerName]["whishlist"].items, itemID)
 				db.players[playerName]["whishlist"].count = db.players[playerName]["whishlist"].count + 1
 
@@ -193,7 +193,7 @@ function OriginsWishlist:AwardItem(session, winner)
 	for index, value in ipairs(db.items[itemID].needed.players) do
 		if value == playerName then tremove(db.items[itemID].needed.players, index) end
 	end
-	db.items[itemID].needed.count = b.items[itemID].needed.count - 1
+	db.items[itemID].needed.count = db.items[itemID].needed.count - 1
 
 	-- Set database update times.
 	db.updatedAt = db.players[playerName].awarded.lastAt
