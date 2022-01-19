@@ -40,6 +40,7 @@ function OriginsWishlist:loadExport(resetAwarded)
 	end
 
 	-- Prepare whishlist per item.
+	db.currentPhase = OriginsWishlistExport.currentPhase
 	db.items = {}
 	for playerName, playerData in pairs(OriginsWishlistExport.players) do
 		if db.players[playerName] ~= nil then
@@ -58,7 +59,7 @@ function OriginsWishlist:loadExport(resetAwarded)
 		end
 
 		-- Populate items lists.
-		for _, itemID in ipairs(playerData.whishlist.items) do
+		for _, itemID in ipairs(playerData.whishlist[db.currentPhase].items) do
 			if itemID > 0 then
 				self:Debug("OnInitialize:AddItem", playerName, itemID)
 
