@@ -41,6 +41,7 @@ function OriginsWishlist:loadExport(resetAwarded)
 
 	-- Prepare whishlist per item.
 	db.currentPhase = OriginsWishlistExport.currentPhase
+	db.nextPhase = OriginsWishlistExport.nextPhase
 	db.items = {}
 	for playerName, playerData in pairs(OriginsWishlistExport.players) do
 		if db.players[playerName] ~= nil then
@@ -50,7 +51,7 @@ function OriginsWishlist:loadExport(resetAwarded)
 			}
 		end
 
-		db.players[playerName]["whishlist"] = { items = {}, count = 0 }
+		db.players[playerName]["whishlist"] = { items = {}, nextPhase = {}, count = 0 }
 		db.players[playerName]["needed"] = { items = {}, count = 0 }
 
 		-- if local awared items was updated more recently than last awarded item in export, keep local awarded items list.
@@ -84,7 +85,11 @@ function OriginsWishlist:loadExport(resetAwarded)
 				
 				tinsert(db.players[playerName]["whishlist"].items, itemID)
 				db.players[playerName]["whishlist"].count = db.players[playerName]["whishlist"].count + 1
-				
+
+				if tContains(playerData.whishlist[db.nextPhase].items, itemID) then
+					tinsert(db.players[playerName]["whishlist"].nextPhase, itemID)
+				end
+
 				if not tContains(db.players[playerName][itemStatus].items, itemID) then
 					tinsert(db.players[playerName][itemStatus].items, itemID)
 					db.players[playerName][itemStatus].count = db.players[playerName][itemStatus].count + 1
@@ -210,10 +215,18 @@ function OriginsWishlist:addItemTooltip(tooltip)
 			needed = needed .. ", "
 		end
 
-		needed = needed .. "|cff" ..  db.players[playerName].classColor .. playerName .. "|r (".. db.players[playerName].awarded.count .. "/" .. db.players[playerName].whishlist.count
+		needed = needed .. "|cff" ..  db.players[playerName].classColor .. playerName .. "|r ("
+
+		if tContains(db.players[playerName]["whishlist"].nextPhase, itemID) then
+			needed = needed .. db.nextPhase .. ", "
+		end
+
+		needed = needed .. db.players[playerName].awarded.count .. "/" .. db.players[playerName].whishlist.count
+
 		if db.players[playerName].awarded.lastAt ~= nil then
 			needed = needed .. ", " .. date("%d %b.", db.players[playerName].awarded.lastAt)
 		end
+
 		needed = needed .. ")"
 	end
 
