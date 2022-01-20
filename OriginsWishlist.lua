@@ -137,9 +137,14 @@ function OriginsWishlist:OnCommReceived(prefix, compressedMessage, distri, sende
 	for key, value in pairs(data) do
 		self:Debug(key, value)
 	end
+	if command == "history" then
+		for key, value in pairs(data[2]) do
+			self:Debug(key, value)
+		end
+	end
 
 	if command == "awarded" then
-		self:AwardItem(data[1], distri)
+		self:AwardItem(data[1], data[2])
 		return
 	end
 end

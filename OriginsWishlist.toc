@@ -2,7 +2,7 @@
 ## Notes: This is an addon for the Orïgins Guild on Auberdine to follow raiders wishlist and items awards.
 ## Author: MrCaillou
 ## Version: 0.3.3
-## Interface-BCC: 20502
+## Interface-BCC: 20503
 ## X-Website: https://github.com/yannlugrin/wow-origins-wishlist
 ## X-Github: https://github.com/yannlugrin/wow-origins-wishlist
 ## X-Curse-Project-ID: 492258
