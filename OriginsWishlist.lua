@@ -39,62 +39,59 @@ function OriginsWishlist:loadExport(resetAwarded)
 	db.nextPhase = OriginsWishlistExport.nextPhase
 	db.items = {}
 	for playerName, playerData in pairs(OriginsWishlistExport.players) do
-		if db.players[playerName] ~= nil then
+		if db.players[playerName] == nil then
 			db.players[playerName] =  {
 				name = playerData.name,
-				classColor = playerData.classColor
+				classColor = playerData.classColor,
 			}
 		end
 
-		-- Ensure to set awarded items for data comming from version previous to 0.3.2
-		if not resetAwarded and db.players[playerName]["awarded"].items == nil then
-			resetAwarded = true
+		-- Ensure to set awarded items for data comming from version previous to 0.3.3
+		if db.players[playerName]["awarded"] ~= nil and db.players[playerName]["awarded"].items == nil then
+			db.players[playerName]["awarded"] = nil
 		end
-
-		db.players[playerName]["whishlist"] = { items = {}, nextPhase = {}, count = 0 }
-		db.players[playerName]["needed"] = { items = {}, count = 0 }
 
 		-- if local awared items was updated more recently than last awarded item in export, keep local awarded items list.
-		if resetAwarded or db.lastAwardedAt == nil or OriginsWishlistExport.lastAwardedAt >= db.lastAwardedAt then
+		if resetAwarded or db.players[playerName]["awarded"] == nil or db.lastAwardedAt == nil or OriginsWishlistExport.lastAwardedAt >= db.lastAwardedAt then
 			db.players[playerName]["awarded"] = { items = {}, count = 0, lastAt = playerData.awarded.lastAt }
 		end
+		db.players[playerName]["whishlist"] = { items = {}, nextPhase = {}, count = playerData.whishlist[db.currentPhase].count }
+		db.players[playerName]["needed"] = { items = {}, count = 0 }
+		db.players[playerName]["awarded"]["count"] = 0
 
 		-- Populate items lists.
 		for _, itemID in ipairs(playerData.whishlist[db.currentPhase].items) do
-			if itemID > 0 then
-				self:Debug("OnInitialize:AddItem", playerName, itemID)
+			self:Debug("OnInitialize:AddItem", playerName, itemID)
 
-				if db.items[itemID] == nil then
-					db.items[itemID] = {
-						whishlist = { players = {}, count = 0 },
-						needed = { players = {}, count = 0 },
-						awarded = { players = {}, count = 0 }
-					}
-				end
-
-				local itemStatus = "needed"
-				if tContains(db.players[playerName].awarded.items, itemID) or tContains(playerData.awarded.items, itemID) then
-					itemStatus = "awarded"
-				end
-
-				tinsert(db.items[itemID]["whishlist"].players, playerName)
-				db.items[itemID]["whishlist"].count = db.items[itemID]["whishlist"].count + 1
-
-				tinsert(db.items[itemID][itemStatus].players, playerName)
-				db.items[itemID][itemStatus].count = db.items[itemID][itemStatus].count + 1
-
-				tinsert(db.players[playerName]["whishlist"].items, itemID)
-				db.players[playerName]["whishlist"].count = db.players[playerName]["whishlist"].count + 1
-
-				if tContains(playerData.whishlist[db.nextPhase].items, itemID) then
-					tinsert(db.players[playerName]["whishlist"].nextPhase, itemID)
-				end
-
-				if not tContains(db.players[playerName][itemStatus].items, itemID) then
-					tinsert(db.players[playerName][itemStatus].items, itemID)
-					db.players[playerName][itemStatus].count = db.players[playerName][itemStatus].count + 1
-				end
+			if db.items[itemID] == nil then
+				db.items[itemID] = {
+					whishlist = { players = {}, count = 0 },
+					needed = { players = {}, count = 0 },
+					awarded = { players = {}, count = 0 }
+				}
 			end
+
+			local itemStatus = "needed"
+			if tContains(db.players[playerName].awarded.items, itemID) or tContains(playerData.awarded.items, itemID) then
+				itemStatus = "awarded"
+			end
+
+			tinsert(db.items[itemID]["whishlist"].players, playerName)
+			db.items[itemID]["whishlist"].count = db.items[itemID]["whishlist"].count + 1
+
+			tinsert(db.items[itemID][itemStatus].players, playerName)
+			db.items[itemID][itemStatus].count = db.items[itemID][itemStatus].count + 1
+
+			tinsert(db.players[playerName]["whishlist"].items, itemID)
+
+			if tContains(playerData.whishlist[db.nextPhase].items, itemID) then
+				tinsert(db.players[playerName]["whishlist"].nextPhase, itemID)
+			end
+
+			if not tContains(db.players[playerName][itemStatus].items, itemID) then
+				tinsert(db.players[playerName][itemStatus].items, itemID)
+			end
+			db.players[playerName][itemStatus].count = db.players[playerName][itemStatus].count + 1
 		end
 	end
 
