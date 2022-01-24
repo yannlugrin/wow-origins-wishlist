@@ -1,8 +1,10 @@
 local addonname, addontable = ...
 _G.OriginsWishlist = LibStub("AceAddon-3.0"):NewAddon(addontable, addonname, "AceConsole-3.0", "AceEvent-3.0", "AceComm-3.0", "AceSerializer-3.0", "AceHook-3.0");
 
-local RCLootCouncil = LibStub("AceAddon-3.0"):GetAddon("RCLootCouncil_Classic")
 local LD = LibStub("LibDeflate")
+
+local RCLootCouncil = LibStub("AceAddon-3.0"):GetAddon("RCLootCouncil_Classic")
+local session = 0
 
 -- db shortcut
 local db
@@ -112,12 +114,25 @@ function OriginsWishlist:OnEnable()
 	self:HookScript(GameTooltip, "OnTooltipSetItem", "addItemTooltip")
 	self:HookScript(ItemRefTooltip, "OnTooltipSetItem", "addItemTooltip")
 	self:HookScript(GameTooltip, "OnTooltipSetUnit", "addPlayerTooltip")
+
+	-- Setup Voting Frame columns
+	self.votingFrame = RCLootCouncil:GetActiveModule("votingframe")
+    self:Hook(self.votingFrame, "SwitchSession", function(_, s) session = s end)
+
+	local whishlist = { name = "BIS", DoCellUpdate = OriginsWishlist.SetCellWhishlist, colName = "BIS", sortnext = #self.votingFrame.scrollCols + 2, width = 60, align = "CENTER", defaultsort = "dsc" }
+	local countAwarded = { name = "Awarded", DoCellUpdate = OriginsWishlist.SetCellAwarded, colName = "countAwarded", sortnext = 5, width = 50, align = "CENTER", defaultsort = "asc" }
+	local lastAwardedAt = { name = "Last awarded", DoCellUpdate = OriginsWishlist.SetCellLastAwarded, colName = "LastAwarded", sortnext = 5, width = 60, align = "LEFT", defaultsort = "dsc" }
+
+	table.insert(self.votingFrame.scrollCols, whishlist)
+	table.insert(self.votingFrame.scrollCols, countAwarded)
+	table.insert(self.votingFrame.scrollCols, lastAwardedAt)
 end
 
 function OriginsWishlist:OnDisable()
 	self:UnregisterChatCommand("whishlist")
 	self:UnregisterAllComm()
 	self:UnregisterAllEvents()
+	self:UnhookAll()
 end
 
 local function decompressor(data)
@@ -156,6 +171,66 @@ function OriginsWishlist:OnMessageReceived(msg, session, winner, status)
 		self:AwardItem(session, winner)
 		return
 	end
+end
+
+function OriginsWishlist.SetCellWhishlist(rowFrame, cellFrame, data, cols, row, realrow, column, fShow, table, ...)
+	local playerName = select(1, strsplit("-", data[realrow].name, 2))
+	local itemID = nil
+
+	local lootTable = RCLootCouncil:GetLootTable()
+	if lootTable[session] ~= nil and lootTable[session].link ~= nil then
+		itemID = tonumber(select(3, strfind(lootTable[session].link, "item:(%d+)")))
+	end
+
+	if db.players[playerName] ~= nil and tContains(db.players[playerName].awarded.items, itemID) then
+		cellFrame.text:SetText("awarded")
+		data[realrow].cols[column].value = 0
+		return
+	end
+
+	if db.players[playerName] ~= nil and tContains(db.players[playerName].needed.items, itemID) then
+		cellFrame.text:SetText("BIS")
+		data[realrow].cols[column].value = tonumber(db.currentPhase:match("P(%d+)"))
+
+		if tContains(db.players[playerName].whishlist.nextPhase, itemID) then
+			cellFrame.text:SetText("BIS " .. db.nextPhase)
+			data[realrow].cols[column].value = tonumber(db.nextPhase:match("P(%d+)"))
+		end
+
+		cellFrame.text:SetTextColor(0, 1, 0, 1)
+		return
+	end
+
+	cellFrame.text:SetText("")
+	data[realrow].cols[column].value = 0
+end
+
+function OriginsWishlist.SetCellAwarded(rowFrame, cellFrame, data, cols, row, realrow, column, fShow, table, ...)
+	local playerName = select(1, strsplit("-", data[realrow].name, 2))
+
+	if db.players[playerName] ~= nil then
+		cellFrame.text:SetText(db.players[playerName].awarded.count .. "/" .. db.players[playerName].whishlist.count)
+		data[realrow].cols[column].value = db.players[playerName].awarded.count or 0
+
+		return
+	end
+
+	cellFrame.text:SetText("")
+	data[realrow].cols[column].value = 0
+end
+
+function OriginsWishlist.SetCellLastAwarded(rowFrame, cellFrame, data, cols, row, realrow, column, fShow, table, ...)
+	local playerName = select(1, strsplit("-", data[realrow].name, 2))
+
+	if db.players[playerName] ~= nil and db.players[playerName].awarded.lastAt ~= nil then
+		cellFrame.text:SetText(date("%d %b.", db.players[playerName].awarded.lastAt))
+		data[realrow].cols[column].value =db.players[playerName].awarded.lastAt
+
+		return
+	end
+
+	cellFrame.text:SetText("")
+	data[realrow].cols[column].value = 0
 end
 
 function OriginsWishlist:AwardItem(session, winner)
