@@ -4,7 +4,7 @@ _G.OriginsWishlist = LibStub("AceAddon-3.0"):NewAddon(addontable, addonname, "Ac
 local LD = LibStub("LibDeflate")
 
 local RCLootCouncil = LibStub("AceAddon-3.0"):GetAddon("RCLootCouncil_Classic")
-local session = 0
+local RCLCSession = 0
 
 -- db shortcut
 local db
@@ -117,7 +117,7 @@ function OriginsWishlist:OnEnable()
 
 	-- Setup Voting Frame columns
 	self.votingFrame = RCLootCouncil:GetActiveModule("votingframe")
-    self:Hook(self.votingFrame, "SwitchSession", function(_, s) session = s end)
+    self:Hook(self.votingFrame, "SwitchSession", function(_, s) RCLCSession = s end)
 
 	local whishlist = { name = "BIS", DoCellUpdate = OriginsWishlist.SetCellWhishlist, colName = "BIS", sortnext = #self.votingFrame.scrollCols + 2, width = 60, align = "CENTER", defaultsort = "dsc" }
 	local countAwarded = { name = "Awarded", DoCellUpdate = OriginsWishlist.SetCellAwarded, colName = "countAwarded", sortnext = 5, width = 50, align = "CENTER", defaultsort = "asc" }
@@ -173,13 +173,13 @@ function OriginsWishlist:OnMessageReceived(msg, session, winner, status)
 	end
 end
 
-function OriginsWishlist.SetCellWhishlist(rowFrame, cellFrame, data, cols, row, realrow, column, fShow, table, ...)
+function OriginsWishlist.SetCellWhishlist(_, cellFrame, data, _, _, realrow, column)
 	local playerName = select(1, strsplit("-", data[realrow].name, 2))
 	local itemID = nil
 
 	local lootTable = RCLootCouncil:GetLootTable()
-	if lootTable[session] ~= nil and lootTable[session].link ~= nil then
-		itemID = tonumber(select(3, strfind(lootTable[session].link, "item:(%d+)")))
+	if lootTable[RCLCSession] ~= nil and lootTable[RCLCSession].link ~= nil then
+		itemID = tonumber(select(3, strfind(lootTable[RCLCSession].link, "item:(%d+)")))
 	end
 
 	if db.players[playerName] ~= nil and tContains(db.players[playerName].awarded.items, itemID) then
@@ -205,7 +205,7 @@ function OriginsWishlist.SetCellWhishlist(rowFrame, cellFrame, data, cols, row, 
 	data[realrow].cols[column].value = 0
 end
 
-function OriginsWishlist.SetCellAwarded(rowFrame, cellFrame, data, cols, row, realrow, column, fShow, table, ...)
+function OriginsWishlist.SetCellAwarded(_, cellFrame, data, _, _, realrow, column)
 	local playerName = select(1, strsplit("-", data[realrow].name, 2))
 
 	if db.players[playerName] ~= nil then
@@ -219,7 +219,7 @@ function OriginsWishlist.SetCellAwarded(rowFrame, cellFrame, data, cols, row, re
 	data[realrow].cols[column].value = 0
 end
 
-function OriginsWishlist.SetCellLastAwarded(rowFrame, cellFrame, data, cols, row, realrow, column, fShow, table, ...)
+function OriginsWishlist.SetCellLastAwarded(_, cellFrame, data, _, _, realrow, column)
 	local playerName = select(1, strsplit("-", data[realrow].name, 2))
 
 	if db.players[playerName] ~= nil and db.players[playerName].awarded.lastAt ~= nil then
