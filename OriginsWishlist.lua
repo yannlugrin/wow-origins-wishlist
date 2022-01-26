@@ -40,7 +40,9 @@ function OriginsWishlist:loadExport(resetAwarded)
 	db.currentPhase = OriginsWishlistExport.currentPhase
 	db.nextPhase = OriginsWishlistExport.nextPhase
 	db.items = {}
-	for playerName, playerData in pairs(OriginsWishlistExport.players) do
+	for _, playerData in pairs(OriginsWishlistExport.players) do
+		local playerName = RCLootCouncil:UnitName(playerData.name)
+
 		if db.players[playerName] == nil then
 			db.players[playerName] =  {
 				name = playerData.name,
@@ -78,10 +80,10 @@ function OriginsWishlist:loadExport(resetAwarded)
 				itemStatus = "awarded"
 			end
 
-			tinsert(db.items[itemID]["whishlist"].players, playerName)
+			tinsert(db.items[itemID]["whishlist"].players, playerData.name)
 			db.items[itemID]["whishlist"].count = db.items[itemID]["whishlist"].count + 1
 
-			tinsert(db.items[itemID][itemStatus].players, playerName)
+			tinsert(db.items[itemID][itemStatus].players, playerData.name)
 			db.items[itemID][itemStatus].count = db.items[itemID][itemStatus].count + 1
 
 			tinsert(db.players[playerName]["whishlist"].items, itemID)
@@ -177,7 +179,7 @@ function OriginsWishlist:OnMessageReceived(msg, session, winner, status)
 end
 
 function OriginsWishlist.SetCellWhishlist(_, cellFrame, data, _, _, realrow, column)
-	local playerName = select(1, strsplit("-", data[realrow].name, 2))
+	local playerName = RCLootCouncil:UnitName(data[realrow].name)
 	local itemID = nil
 
 	local lootTable = RCLootCouncil:GetLootTable()
@@ -209,7 +211,7 @@ function OriginsWishlist.SetCellWhishlist(_, cellFrame, data, _, _, realrow, col
 end
 
 function OriginsWishlist.SetCellAwarded(_, cellFrame, data, _, _, realrow, column)
-	local playerName = select(1, strsplit("-", data[realrow].name, 2))
+	local playerName = RCLootCouncil:UnitName(data[realrow].name)
 
 	if db.players[playerName] ~= nil then
 		cellFrame.text:SetText(db.players[playerName].awarded.count .. "/" .. db.players[playerName].whishlist.count)
@@ -223,7 +225,7 @@ function OriginsWishlist.SetCellAwarded(_, cellFrame, data, _, _, realrow, colum
 end
 
 function OriginsWishlist.SetCellLastAwarded(_, cellFrame, data, _, _, realrow, column)
-	local playerName = select(1, strsplit("-", data[realrow].name, 2))
+	local playerName = RCLootCouncil:UnitName(data[realrow].name)
 
 	if db.players[playerName] ~= nil and db.players[playerName].awarded.lastAt ~= nil then
 		cellFrame.text:SetText(date("%d %b.", db.players[playerName].awarded.lastAt))
@@ -241,7 +243,7 @@ function OriginsWishlist:AwardItem(session, winner)
 
 	if lootTable[session] == nil or lootTable[session].link == nil or winner == nil then return end
 	local itemID = tonumber(select(3, strfind(lootTable[session].link, "item:(%d+)")))
-	local playerName = select(1, strsplit("-", winner, 2))
+	local playerName = RCLootCouncil:UnitName(winner)
 
 	self:Debug("OriginsWishlist:AwardItem", playerName, itemID, lootTable[session].link)
 	if db.players[playerName] == nil then return end
@@ -290,12 +292,14 @@ function OriginsWishlist:addItemTooltip(tooltip)
 
 	-- Prepare needed line
 	local needed = ""
-	for _, playerName in ipairs(db.items[itemID].needed.players) do
+	for _, name in ipairs(db.items[itemID].needed.players) do
+		local playerName = RCLootCouncil:UnitName(name)
+
 		if needed ~= "" then
 			needed = needed .. ", "
 		end
 
-		needed = needed .. "|cff" ..  db.players[playerName].classColor .. playerName .. "|r ("
+		needed = needed .. "|cff" ..  db.players[playerName].classColor .. name .. "|r ("
 
 		if tContains(db.players[playerName]["whishlist"].nextPhase, itemID) then
 			needed = needed .. db.nextPhase .. ", "
@@ -312,12 +316,14 @@ function OriginsWishlist:addItemTooltip(tooltip)
 
 	-- Prepare awarded line
 	local awarded = ""
-	for _, playerName in ipairs(db.items[itemID].awarded.players) do
+	for _, name in ipairs(db.items[itemID].awarded.players) do
+		local playerName = RCLootCouncil:UnitName(name)
+
 		if awarded ~= "" then
 			awarded = awarded .. ", "
 		end
 
-		awarded = awarded .. "|cff" ..  db.players[playerName].classColor .. playerName .. "|r"
+		awarded = awarded .. "|cff" ..  db.players[playerName].classColor .. name .. "|r"
 	end
 
 	-- Display info on tooltip
@@ -337,6 +343,7 @@ end
 -- Player Tooltip hook
 function OriginsWishlist:addPlayerTooltip(tooltip)
 	local playerName, _ = tooltip:GetUnit()
+	playerName = RCLootCouncil:UnitName(playerName)
 
 	if db.players[playerName] ~= nil then
 		tooltip:AddLine("\nOrïgins Wishlist (".. db.players[playerName].awarded.count .. "/" .. db.players[playerName].whishlist.count .. ")", nil, nil, nil, false)
