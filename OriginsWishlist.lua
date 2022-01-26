@@ -93,8 +93,11 @@ function OriginsWishlist:loadExport(resetAwarded)
 			if not tContains(db.players[playerName][itemStatus].items, itemID) then
 				tinsert(db.players[playerName][itemStatus].items, itemID)
 			end
-			db.players[playerName][itemStatus].count = db.players[playerName][itemStatus].count + 1
 		end
+
+		db.players[playerName].whishlist.count = playerData.whishlist[db.currentPhase].count
+		db.players[playerName].needed.count = playerData.whishlist[db.currentPhase].count - playerData.awarded.count
+		db.players[playerName].awarded.count = playerData.awarded.count
 	end
 
 	-- Set local database updated dates.
