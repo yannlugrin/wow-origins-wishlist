@@ -269,11 +269,11 @@ function OriginsWishlist:AwardItem(session, winner)
 		}
 	end
 
-	tinsert(db.items[itemID].awarded.players, playerName)
+	tinsert(db.items[itemID].awarded.players, db.players[playerName].name)
 	db.items[itemID].awarded.count = db.items[itemID].awarded.count + 1
 
 	for index, value in ipairs(db.items[itemID].needed.players) do
-		if value == playerName then tremove(db.items[itemID].needed.players, index) end
+		if RCLootCouncil:UnitName(value) == playerName then tremove(db.items[itemID].needed.players, index) end
 	end
 	db.items[itemID].needed.count = db.items[itemID].needed.count - 1
 
