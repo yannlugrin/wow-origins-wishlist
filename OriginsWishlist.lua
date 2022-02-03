@@ -49,11 +49,6 @@ function OriginsWishlist:loadExport(resetAwarded)
 			}
 		end
 
-		-- Ensure to set awarded items for data comming from version previous to 0.3.3
-		if db.players[playerName]["awarded"] ~= nil and db.players[playerName]["awarded"].items == nil then
-			db.players[playerName]["awarded"] = nil
-		end
-
 		-- if local awared items was updated more recently than last awarded item in export, keep local awarded items list.
 		if resetAwarded or db.players[playerName]["awarded"] == nil or db.lastAwardedAt == nil or OriginsWishlistExport.lastAwardedAt >= db.lastAwardedAt then
 			db.players[playerName]["awarded"] = { items = {}, count = 0, lastAt = playerData.awarded.lastAt }
@@ -298,6 +293,14 @@ function OriginsWishlist:ChatCommand(msg)
 	self:Debug("/", input, unpack(args))
 
 	if input == 'reset' then
+		OriginsWishlist:loadExport(true)
+		return
+	end
+
+	if input == 'full-reset' then
+		db.items = {}
+		db.players = {}
+		db.updatedAt = nil
 		OriginsWishlist:loadExport(true)
 		return
 	end
