@@ -32,6 +32,7 @@ read_globals = {
 	"GameTooltip",
 	"GetAddOnMetadata",
 	"ItemRefTooltip",
+	"UnitName",
 	
 	-- WoW lua globals
 	"tContains",
