@@ -1,10 +1,10 @@
 OriginsWishlistExport = {}
 OriginsWishlistExport["updatedAt"] = @file-timestamp@
-OriginsWishlistExport["lastAwardedAt"] = 1643928092
+OriginsWishlistExport["lastAwardedAt"] = 1643932800
 OriginsWishlistExport["currentPhase"] = "P3"
 OriginsWishlistExport["nextPhase"] = "P4"
 OriginsWishlistExport["players"] = {}
-OriginsWishlistExport["players"]["Alverius"] = {name = "Alverius", classColor = "f48cba", whishlist = {P3 = { items = {28830, 29947, 30022, 30055, 30106, 30900, 30905, 32235, 32332, 32335, 32366, 32574, 33122}, count = 13}, P4 = { items = {}, count = 0}},awarded = {items = {0, 29947, 33122}, count = 2, lastAt = 1641427200}}
+OriginsWishlistExport["players"]["Alverius"] = {name = "Alverius", classColor = "f48cba", whishlist = {P3 = { items = {28830, 29947, 30022, 30055, 30106, 30900, 30905, 32235, 32332, 32335, 32366, 32574, 33122}, count = 13}, P4 = { items = {}, count = 0}},awarded = {items = {0, 29947, 32574, 33122}, count = 3, lastAt = 1643932800}}
 OriginsWishlistExport["players"]["Asdahyat"] = {name = "Asdahyat", classColor = "ff7c0a", whishlist = {P3 = { items = {19395, 23547, 29989, 30051, 30110, 30868, 30885, 30908, 31032, 31037, 31041, 31045, 31047, 31090, 31093, 31096, 31099, 31102, 32370, 32496, 32519, 32528}, count = 17}, P4 = { items = {}, count = 0}},awarded = {items = {0, 30868}, count = 1, lastAt = 1643846400}}
 OriginsWishlistExport["players"]["Ashäe"] = {name = "Ashäe", classColor = "0070dd", whishlist = {P3 = { items = {28590, 30869, 30882, 30912, 31007, 31012, 31016, 31022, 31091, 31094, 31096, 31097, 31103, 32258, 32370, 32496, 32500, 32524, 32528, 32609}, count = 15}, P4 = { items = {}, count = 0}},awarded = {items = {0, 28590, 30882}, count = 2, lastAt = 1643587200}}
 OriginsWishlistExport["players"]["Aiffyrd"] = {name = "Aiffyrd", classColor = "ff7c0a", whishlist = {P3 = { items = {29994, 30106, 30883, 31034, 31039, 31042, 31044, 31048, 31090, 31093, 31096, 31099, 31102, 32260, 32266, 32324, 32366, 32501, 32505}, count = 14}, P4 = { items = {}, count = 0}},awarded = {items = {0}, count = 0, lastAt = nil}}
