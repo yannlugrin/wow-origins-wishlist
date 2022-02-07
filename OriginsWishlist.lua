@@ -30,6 +30,65 @@ function OriginsWishlist:OnInitialize()
 	db.version = self.version
 end
 
+function OriginsWishlist:OnEnable()
+	self:RegisterComm("RCLootCouncil")
+
+	self:RegisterMessage("RCMLLootHistorySend", "OnMessageReceived")
+	self:RegisterMessage("RCMLAwardSuccess", "OnMessageReceived")
+	self:RegisterMessage("RCMLAwardFailed", "OnMessageReceived")
+
+	self:RegisterChatCommand("wishlist", "ChatCommand")
+
+	self:HookScript(GameTooltip, "OnTooltipSetItem", "addItemTooltip")
+	self:HookScript(ItemRefTooltip, "OnTooltipSetItem", "addItemTooltip")
+	self:HookScript(GameTooltip, "OnTooltipSetUnit", "addPlayerTooltip")
+end
+
+function OriginsWishlist:OnDisable()
+	self:UnregisterChatCommand("wishlist")
+	self:UnregisterAllComm()
+	self:UnregisterAllEvents()
+	self:UnhookAll()
+end
+
+local function decompressor(data)
+	local decoded = LD:DecodeForWoWAddonChannel(data)
+	if not decoded then return data end -- Assume it's a pre 0.10 message.
+	local serializedMsg = LD:DecompressDeflate(decoded)
+	return serializedMsg or ""
+end
+
+function OriginsWishlist:OnCommReceived(prefix, compressedMessage, distri, sender)
+	if prefix ~= "RCLootCouncil" then return end
+
+	local test, command, data = RCLootCouncil:Deserialize(decompressor(compressedMessage))
+	if RCLootCouncil:HandleXRealmComms(self, command, data, sender) then return end
+
+	self:Debug("Comm received:", command, "from:", sender, "distri:", distri, "test:", test)
+	for key, value in pairs(data) do
+		self:Debug(key, value)
+	end
+	if command == "history" then
+		for key, value in pairs(data[2]) do
+			self:Debug(key, value)
+		end
+	end
+
+	if command == "awarded" then
+		self:AwardItem(data[1], data[2])
+		return
+	end
+end
+
+function OriginsWishlist:OnMessageReceived(msg, session, winner, status)
+	self:Debug("OnMessageReceived", msg, session, winner, status)
+
+	if msg == "RCMLAwardSuccess" then
+		self:AwardItem(session, winner)
+		return
+	end
+end
+
 function OriginsWishlist:loadExport(resetAwarded)
 	resetAwarded = resetAwarded or false
 
@@ -99,65 +158,6 @@ function OriginsWishlist:loadExport(resetAwarded)
 	-- Set local database updated dates.
 	db.updatedAt = OriginsWishlistExport.updatedAt
 	db.lastAwardedAt = OriginsWishlistExport.lastAwardedAt
-end
-
-function OriginsWishlist:OnEnable()
-	self:RegisterComm("RCLootCouncil")
-
-	self:RegisterMessage("RCMLLootHistorySend", "OnMessageReceived")
-	self:RegisterMessage("RCMLAwardSuccess", "OnMessageReceived")
-	self:RegisterMessage("RCMLAwardFailed", "OnMessageReceived")
-
-	self:RegisterChatCommand("whishlist", "ChatCommand")
-
-	self:HookScript(GameTooltip, "OnTooltipSetItem", "addItemTooltip")
-	self:HookScript(ItemRefTooltip, "OnTooltipSetItem", "addItemTooltip")
-	self:HookScript(GameTooltip, "OnTooltipSetUnit", "addPlayerTooltip")
-end
-
-function OriginsWishlist:OnDisable()
-	self:UnregisterChatCommand("whishlist")
-	self:UnregisterAllComm()
-	self:UnregisterAllEvents()
-	self:UnhookAll()
-end
-
-local function decompressor(data)
-	local decoded = LD:DecodeForWoWAddonChannel(data)
-	if not decoded then return data end -- Assume it's a pre 0.10 message.
-	local serializedMsg = LD:DecompressDeflate(decoded)
-	return serializedMsg or ""
-end
-
-function OriginsWishlist:OnCommReceived(prefix, compressedMessage, distri, sender)
-	if prefix ~= "RCLootCouncil" then return end
-
-	local test, command, data = RCLootCouncil:Deserialize(decompressor(compressedMessage))
-	if RCLootCouncil:HandleXRealmComms(self, command, data, sender) then return end
-
-	self:Debug("Comm received:", command, "from:", sender, "distri:", distri, "test:", test)
-	for key, value in pairs(data) do
-		self:Debug(key, value)
-	end
-	if command == "history" then
-		for key, value in pairs(data[2]) do
-			self:Debug(key, value)
-		end
-	end
-
-	if command == "awarded" then
-		self:AwardItem(data[1], data[2])
-		return
-	end
-end
-
-function OriginsWishlist:OnMessageReceived(msg, session, winner, status)
-	self:Debug("OnMessageReceived", msg, session, winner, status)
-
-	if msg == "RCMLAwardSuccess" then
-		self:AwardItem(session, winner)
-		return
-	end
 end
 
 function OriginsWishlist:AwardItem(session, winner)
