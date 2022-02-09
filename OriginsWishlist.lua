@@ -9,7 +9,7 @@ local RCLootCouncil = LibStub("AceAddon-3.0"):GetAddon("RCLootCouncil_Classic")
 local db
 
 -- lua
-local ipairs, pairs, select, tContains, time, tinsert, tremove = ipairs, pairs, select, tContains, time, tinsert, tremove
+local ipairs, pairs, select, tContains, time, tinsert, tremove, unpack = ipairs, pairs, select, tContains, time, tinsert, tremove, unpack
 
 -- Initilize method
 --
@@ -109,12 +109,13 @@ function OriginsWishlist:loadExport(resetAwarded)
 		end
 
 		-- if local awared items was updated more recently than last awarded item in export, keep local awarded items list.
+		local awarded = {unpack(db.players[playerName].awarded.items)}
 		if resetAwarded or db.players[playerName]["awarded"] == nil or db.lastAwardedAt == nil or OriginsWishlistExport.lastAwardedAt >= db.lastAwardedAt then
-			db.players[playerName]["awarded"] = { items = {}, count = 0, lastAt = playerData.awarded.lastAt }
+			awarded = {unpack(playerData.awarded.items)}
 		end
 		db.players[playerName]["whishlist"] = { items = {}, nextPhase = {}, count = playerData.whishlist[db.currentPhase].count }
 		db.players[playerName]["needed"] = { items = {}, count = 0 }
-		db.players[playerName]["awarded"]["count"] = 0
+		db.players[playerName]["awarded"]["awarded"] = { items = {}, count = 0, lastAt = playerData.awarded.lastAt }
 
 		-- Populate items lists.
 		for _, itemID in ipairs(playerData.whishlist[db.currentPhase].items) do
@@ -129,8 +130,12 @@ function OriginsWishlist:loadExport(resetAwarded)
 			end
 
 			local itemStatus = "needed"
-			if tContains(db.players[playerName].awarded.items, itemID) or tContains(playerData.awarded.items, itemID) then
+			if tContains(awarded, itemID) then
 				itemStatus = "awarded"
+
+				for index, value in ipairs(awarded) do
+					if value == itemID then tremove(awarded, index); break end
+				end
 			end
 
 			tinsert(db.items[itemID]["whishlist"].players, playerData.name)
@@ -140,13 +145,10 @@ function OriginsWishlist:loadExport(resetAwarded)
 			db.items[itemID][itemStatus].count = db.items[itemID][itemStatus].count + 1
 
 			tinsert(db.players[playerName]["whishlist"].items, itemID)
+			tinsert(db.players[playerName][itemStatus].items, itemID)
 
 			if tContains(playerData.whishlist[db.nextPhase].items, itemID) then
 				tinsert(db.players[playerName]["whishlist"].nextPhase, itemID)
-			end
-
-			if not tContains(db.players[playerName][itemStatus].items, itemID) then
-				tinsert(db.players[playerName][itemStatus].items, itemID)
 			end
 		end
 
@@ -178,7 +180,7 @@ function OriginsWishlist:AwardItem(session, winner)
 	db.players[playerName].awarded.lastAt = time()
 
 	for index, value in ipairs(db.players[playerName].needed.items) do
-		if value == itemID then tremove(db.players[playerName].needed.items, index) end
+		if value == itemID then tremove(db.players[playerName].needed.items, index); break end
 	end
 	db.players[playerName].needed.count = db.players[playerName].needed.count - 1
 
@@ -195,7 +197,7 @@ function OriginsWishlist:AwardItem(session, winner)
 	db.items[itemID].awarded.count = db.items[itemID].awarded.count + 1
 
 	for index, value in ipairs(db.items[itemID].needed.players) do
-		if RCLootCouncil:UnitName(value) == playerName then tremove(db.items[itemID].needed.players, index) end
+		if RCLootCouncil:UnitName(value) == playerName then tremove(db.items[itemID].needed.players, index); break end
 	end
 	db.items[itemID].needed.count = db.items[itemID].needed.count - 1
 

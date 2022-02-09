@@ -61,5 +61,6 @@ read_globals = {
 	"time",
 	"tonumber",
 	"tostring",
-	"type"
+	"type",
+	"unpack"
 }
