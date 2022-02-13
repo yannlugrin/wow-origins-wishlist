@@ -109,13 +109,16 @@ function OriginsWishlist:loadExport(resetAwarded)
 		end
 
 		-- if local awared items was updated more recently than last awarded item in export, keep local awarded items list.
-		local awarded = {unpack(db.players[playerName].awarded.items)}
-		if resetAwarded or db.players[playerName]["awarded"] == nil or db.lastAwardedAt == nil or OriginsWishlistExport.lastAwardedAt >= db.lastAwardedAt then
+		local awarded = nil
+		if db.players[playerName].awarded ~= nil and db.players[playerName].awarded.items ~= nil then
+			awarded = {unpack(db.players[playerName].awarded.items)}
+		end
+		if resetAwarded or awarded == nil or db.lastAwardedAt == nil or OriginsWishlistExport.lastAwardedAt >= db.lastAwardedAt then
 			awarded = {unpack(playerData.awarded.items)}
 		end
 		db.players[playerName]["whishlist"] = { items = {}, nextPhase = {}, count = playerData.whishlist[db.currentPhase].count }
 		db.players[playerName]["needed"] = { items = {}, count = 0 }
-		db.players[playerName]["awarded"]["awarded"] = { items = {}, count = 0, lastAt = playerData.awarded.lastAt }
+		db.players[playerName]["awarded"] = { items = {}, count = 0, lastAt = playerData.awarded.lastAt }
 
 		-- Populate items lists.
 		for _, itemID in ipairs(playerData.whishlist[db.currentPhase].items) do
