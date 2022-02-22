@@ -1,6 +1,6 @@
 OriginsWishlistExport = {}
 OriginsWishlistExport["updatedAt"] = @file-timestamp@
-OriginsWishlistExport["lastAwardedAt"] = 1645140087
+OriginsWishlistExport["lastAwardedAt"] = 1645487728
 OriginsWishlistExport["currentPhase"] = "P3"
 OriginsWishlistExport["nextPhase"] = "P4"
 OriginsWishlistExport["players"] = {}
@@ -22,7 +22,7 @@ OriginsWishlistExport["players"]["Karrirette"] = {name = "Karrirette", classColo
 OriginsWishlistExport["players"]["Narcose"] = {name = "Narcose", classColor = "c69b6d", whishlist = {P3 = { items = {30906, 30970, 30976, 30978, 30980, 31091, 31094, 31100, 31103, 32232, 32261, 32268, 32333, 32362, 32369, 32375, 32501, 32505, 32521, 34010}, count = 16}, P4 = { items = {}, count = 0}},awarded = {items = {30970, 31094, 32232}, count = 2, lastAt = 1644192000}}
 OriginsWishlistExport["players"]["Nõva"] = {name = "Nõva", classColor = "3fc7eb", whishlist = {P3 = { items = {29982, 30872, 30888, 30910, 31055, 31057, 31058, 31059, 31090, 31093, 31099, 31102, 32239, 32331, 32483, 32525, 32527, 32586, 32589}, count = 15}, P4 = { items = {}, count = 0}},awarded = {items = {29982, 30888, 32589}, count = 3, lastAt = 1645056000}}
 OriginsWishlistExport["players"]["Okrag"] = {name = "Okrag", classColor = "ffffff", whishlist = {P3 = { items = {29989, 30110, 30871, 30911, 30912, 31063, 31066, 31069, 31089, 31093, 31097, 31103, 32353, 32363, 32370, 32496, 32500, 32519, 32528, 32609}, count = 16}, P4 = { items = {}, count = 0}},awarded = {items = {30110}, count = 1, lastAt = 1641772800}}
-OriginsWishlistExport["players"]["Onetwo"] = {name = "Onetwo", classColor = "0070dd", whishlist = {P3 = { items = {19406, 23548, 30106, 30863, 30900, 30905, 32235, 32260, 32323, 32347, 32377, 32497, 32505, 32510, 32526, 32943}, count = 16}, P4 = { items = {}, count = 0}},awarded = {items = {}, count = 0, lastAt = nil}}
+OriginsWishlistExport["players"]["Onetwo"] = {name = "Onetwo", classColor = "0070dd", whishlist = {P3 = { items = {19406, 23548, 30106, 30863, 30900, 30905, 32235, 32260, 32323, 32347, 32377, 32497, 32505, 32510, 32526, 32943}, count = 16}, P4 = { items = {}, count = 0}},awarded = {items = {32526}, count = 1, lastAt = 1645401600}}
 OriginsWishlistExport["players"]["Qetzar"] = {name = "Qetzar", classColor = "ff7c0a", whishlist = {P3 = { items = {8345, 29994, 30106, 30627, 30883, 31034, 31042, 31044, 31048, 31090, 31093, 31099, 31102, 32260, 32324, 32366, 32497, 32505}, count = 14}, P4 = { items = {}, count = 0}},awarded = {items = {8345, 29994, 30627}, count = 3, lastAt = 1643241600}}
 OriginsWishlistExport["players"]["Reïju"] = {name = "Reïju", classColor = "c69b6d", whishlist = {P3 = { items = {23548, 28439, 28830, 30105, 30863, 30881, 30915, 30969, 30972, 30975, 30979, 31091, 31094, 31095, 31103, 32260, 32266, 32323, 32341, 32345, 32497, 32505}, count = 18}, P4 = { items = {}, count = 0}},awarded = {items = {23548, 28439, 28830, 30915}, count = 4, lastAt = 1645056000}}
 OriginsWishlistExport["players"]["Sarumman"] = {name = "Sarumman", classColor = "", whishlist = {P3 = { items = {}, count = 0}, P4 = { items = {}, count = 0}},awarded = {items = {}, count = 0, lastAt = nil}}
