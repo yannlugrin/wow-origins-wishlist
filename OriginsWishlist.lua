@@ -133,7 +133,7 @@ function OriginsWishlist:loadExport(resetAwarded)
 			end
 
 			local itemStatus = "needed"
-			if tContains(awarded, itemID) then
+			if awarded ~= nil and tContains(awarded, itemID) then
 				itemStatus = "awarded"
 
 				for index, value in ipairs(awarded) do
@@ -297,15 +297,16 @@ function OriginsWishlist:ChatCommand(msg)
 
 	self:Debug("/", input, unpack(args))
 
-	if input == 'reset' then
-		OriginsWishlist:loadExport(true)
+	if input == 'reload' then
+		OriginsWishlist:loadExport(false)
 		return
 	end
 
-	if input == 'full-reset' then
+	if input == 'reset' or input == 'full-reset' then
 		db.items = {}
 		db.players = {}
 		db.updatedAt = nil
+		db.lastAwardedAt = nil
 		OriginsWishlist:loadExport(true)
 		return
 	end
@@ -319,6 +320,7 @@ function OriginsWishlist:ChatCommand(msg)
 	if input == 'version' or input == "v" then
 		self:Print(self.name, self.version)
 		self:Print("Database update:", db.updatedAt)
+		self:Print("Last awarded:", db.lastAwardedAt)
 		return
 	end
 end
