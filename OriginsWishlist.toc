@@ -6,6 +6,7 @@
 ## X-Website: https://github.com/yannlugrin/wow-origins-wishlist
 ## X-Github: https://github.com/yannlugrin/wow-origins-wishlist
 ## X-Curse-Project-ID: 492258
+## X-Wago-ID: LvNAvB6o
 ## Dependencies: RCLootCouncil_Classic
 ## OptionalDeps: LibStub, Ace3
 ## SavedVariables: OriginsWishlistDB
